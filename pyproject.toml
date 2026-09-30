@@ -18,3 +18,7 @@ build-backend = "uv_build"
 
 [tool.databricks.environment]
 environment_version = '6'
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
