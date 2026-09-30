@@ -1,9 +1,14 @@
 SOURCE_CATALOG = "samples"
 SOURCE_SCHEMA = "tpch"
 
-BRONZE_SCHEMA = "bronze"
-SILVER_SCHEMA = "silver"
-GOLD_SCHEMA = "gold"
+TARGET_CATALOG = "workspace"
+
+BRONZE_SCHEMA = "marketing_bronze"
+SILVER_SCHEMA = "marketing_silver"
+GOLD_SCHEMA = "marketing_gold"
 
 CUSTOMER_SOURCE = f"{SOURCE_CATALOG}.{SOURCE_SCHEMA}.customer"
 ORDERS_SOURCE = f"{SOURCE_CATALOG}.{SOURCE_SCHEMA}.orders"
+
+CUSTOMER_BRONZE = f"{TARGET_CATALOG}.{BRONZE_SCHEMA}.customer"
+ORDERS_BRONZE = f"{TARGET_CATALOG}.{BRONZE_SCHEMA}.orders"
