@@ -16,6 +16,8 @@ marketing-lakehouse-project = "marketing_lakehouse_project:main"
 requires = ["uv_build>=0.12.13,<0.13.0"]
 build-backend = "uv_build"
 
+[tool.databricks.environment]
+environment_version = '6'
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
