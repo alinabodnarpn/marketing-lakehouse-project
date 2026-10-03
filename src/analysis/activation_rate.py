@@ -1,14 +1,14 @@
 from pyspark.sql import functions as F
 
 from config.settings import (
-    CUSTOMER_BRONZE,
-    ORDERS_BRONZE,
+    CUSTOMER_SILVER,
+    ORDERS_SILVER,
 )
 
 
 def calculate_activation_rate(spark, segment="BUILDING"):
-    customers = spark.table(CUSTOMER_BRONZE)
-    orders = spark.table(ORDERS_BRONZE)
+    customers = spark.table(CUSTOMER_SILVER)
+    orders = spark.table(ORDERS_SILVER)
 
     filtered_customers = (
         customers
