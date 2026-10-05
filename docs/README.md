@@ -110,6 +110,44 @@ Monthly breakdown:
 
 The monthly distribution can also be visualized as a bar chart in the Databricks analysis notebook.
 
+## Business Question 4 — 1996 Cohort Retention
+
+**Question:**
+
+Group customers by the month of their first order (cohort). For each 1996 cohort, what share of customers placed another order within the next three months?
+
+Definitions:
+
+- `first_order_date = MIN(o_orderdate)`; `cohort = month(first_order_date)`
+- orders of a customer are ranked by `(o_orderdate, o_orderkey)`; the customer has **returned** if order #2 exists and
+  `second_order_date <= add_months(first_order_date, 3)` (inclusive; a same-day second order counts)
+- `retention_rate = returned_customers / cohort_customers`
+
+The 3-month window is measured from each customer's own first order, not from the start of the cohort month.
+`is_window_complete` checks that the data covers the full window for every customer in the cohort
+(TPC-H orders run until 1998-08-02, so all 1996 cohorts are complete).
+
+Result table: `workspace.marketing_gold.cohort_retention_1996`.
+
+### Validation
+
+`tests/test_cohorts_monitoring.py` checks that:
+
+- there are exactly 12 cohorts, all in 1996, with complete observation windows
+- `0 <= retention_rate <= 1` and `returned_customers <= cohort_customers`
+- cohort sizes equal the number of Gold customers with a first order in that month
+- January–March cohorts add up to the Q2 answer (new customers in 1996-Q1)
+
+## Monitoring
+
+Two Gold tables, one row per complete month:
+
+- `monitoring_activation_rate_by_segment` — cumulative activation rate per segment
+- `monitoring_new_customers_monthly` — new customers per month (with `quarter` for quarterly views)
+
+Alerts: activation rate drop > 1 pp month over month; new customers < 50% of the trailing 3-month average.
+Tests check that the latest monitored activation matches Gold and that monthly new customers sum to the Gold total.
+
 ## Relevant Files
 
 Silver transformation:
@@ -123,6 +161,8 @@ Business question analysis:
 
 ```text
 src/analysis/new_customers.py
+src/analysis/cohort_retention.py
+src/monitoring/marketing_monitoring.py
 ```
 
 Validation:
@@ -136,6 +176,14 @@ Databricks notebooks:
 ```text
 notebooks/new_customers.ipynb
 notebooks/validate_order_customer_reference.ipynb
+notebooks/cohort_retention_monitoring.ipynb
+notebooks/run_pipeline.ipynb
+```
+
+Dashboard datasets:
+
+```text
+dashboards/marketing_dashboard.sql
 ```
 
 ER diagram:
