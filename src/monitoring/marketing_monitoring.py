@@ -22,8 +22,10 @@ from config.settings import (
 ACTIVATION_DROP_PP = 1.0
 
 # Alert: new customers in a month fell below this share of the trailing
-# 3-month average.
+# 3-month average. Months whose trailing average is below the minimum are
+# skipped: at a handful of customers per month a 50% drop is just noise.
 NEW_CUSTOMERS_DROP_RATIO = 0.5
+NEW_CUSTOMERS_MIN_TRAILING_AVG = 10
 TRAILING_MONTHS = 3
 
 
@@ -135,7 +137,8 @@ def build_new_customers_monitoring(spark):
         .withColumn(
             "is_alert",
             F.coalesce(
-                F.col("new_customers") < F.col("trailing_avg") * NEW_CUSTOMERS_DROP_RATIO,
+                (F.col("trailing_avg") >= NEW_CUSTOMERS_MIN_TRAILING_AVG)
+                & (F.col("new_customers") < F.col("trailing_avg") * NEW_CUSTOMERS_DROP_RATIO),
                 F.lit(False),
             ),
         )

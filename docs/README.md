@@ -129,6 +129,30 @@ The 3-month window is measured from each customer's own first order, not from th
 
 Result table: `workspace.marketing_gold.cohort_retention_1996`.
 
+### Result
+
+Across all 1996 cohorts, **149 of 424 customers (35.1%)** placed another order within three months of their first one.
+
+| Cohort | Customers | Returned within 3 months | Retention |
+|---|---:|---:|---:|
+| 1996-01 | 54 | 18 | 33.3% |
+| 1996-02 | 44 | 20 | 45.5% |
+| 1996-03 | 59 | 24 | 40.7% |
+| 1996-04 | 63 | 26 | 41.3% |
+| 1996-05 | 45 | 9 | 20.0% |
+| 1996-06 | 36 | 13 | 36.1% |
+| 1996-07 | 21 | 5 | 23.8% |
+| 1996-08 | 26 | 9 | 34.6% |
+| 1996-09 | 19 | 7 | 36.8% |
+| 1996-10 | 22 | 12 | 54.5% |
+| 1996-11 | 17 | 2 | 11.8% |
+| 1996-12 | 18 | 4 | 22.2% |
+| **Total** | **424** | **149** | **35.1%** |
+
+Highest: 1996-10 (54.5%); lowest: 1996-11 (11.8%). Cohorts are small (17–63 customers), so one customer
+moves a cohort's rate by 2–6 pp — month-to-month swings are mostly noise. The first half of the year
+(Jan–Apr, larger cohorts) retains consistently at 33–45%.
+
 ### Validation
 
 `tests/test_cohorts_monitoring.py` checks that:
@@ -145,7 +169,13 @@ Two Gold tables, one row per complete month:
 - `monitoring_activation_rate_by_segment` — cumulative activation rate per segment
 - `monitoring_new_customers_monthly` — new customers per month (with `quarter` for quarterly views)
 
-Alerts: activation rate drop > 1 pp month over month; new customers < 50% of the trailing 3-month average.
+Alerts: activation rate drop > 1 pp month over month; new customers < 50% of the trailing 3-month average
+(only when that average is at least 10 — below that a 50% drop is one or two customers).
+
+New customers per month decline steadily over the data range: TPC-H has a fixed customer pool, so by 1997–1998
+almost every customer who will ever order has already placed a first order. On the current data the rules flag
+**1996-07** (21 new customers vs a trailing average of 48) and **1997-04** (4 vs 14.7).
+No activation-rate alerts fire, as expected for a cumulative metric on clean data.
 Tests check that the latest monitored activation matches Gold and that monthly new customers sum to the Gold total.
 
 ## Relevant Files

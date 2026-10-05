@@ -62,7 +62,7 @@ month is dropped, so periods are always comparable).
 | Table | Metric | Alert rule |
 |-------|--------|-----------|
 | `monitoring_activation_rate_by_segment` | customers in segment with first order ≤ month end / all customers in segment | drop > 1 pp vs previous month |
-| `monitoring_new_customers_monthly` | customers whose first order falls in the month | < 50% of trailing 3-month average |
+| `monitoring_new_customers_monthly` | customers whose first order falls in the month | < 50% of trailing 3-month average (only when that average ≥ 10) |
 
 Activation rate here is cumulative, so on a stable customer base it can only grow —
 any drop means customers appeared without orders or orders were lost upstream.
