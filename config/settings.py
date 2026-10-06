@@ -18,6 +18,9 @@ ORDERS_SILVER = f"{TARGET_CATALOG}.{SILVER_SCHEMA}.orders"
 
 CUSTOMER_GOLD = f"{TARGET_CATALOG}.{GOLD_SCHEMA}.customer_marketing"
 RPR_GOLD = f"{TARGET_CATALOG}.{GOLD_SCHEMA}.repeat_purchase_rate_by_segment"
+COHORT_RETENTION_GOLD = f"{TARGET_CATALOG}.{GOLD_SCHEMA}.cohort_retention_1996"
+ACTIVATION_MONITORING_GOLD = f"{TARGET_CATALOG}.{GOLD_SCHEMA}.monitoring_activation_rate_by_segment"
+NEW_CUSTOMERS_MONITORING_GOLD = f"{TARGET_CATALOG}.{GOLD_SCHEMA}.monitoring_new_customers_monthly"
 
 # Gold reads Silver (medallion: Bronze → Silver → Gold).
 CUSTOMER_GOLD_SOURCE = CUSTOMER_SILVER
