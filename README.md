@@ -25,7 +25,7 @@ src/monitoring/             # monitoring tables + alert rules
 src/validation/             # cross-table checks
 tests/                      # pytest (run via notebooks/run_tests.ipynb)
 notebooks/                  # thin Databricks notebooks
-dashboards/                 # SQL datasets for the Databricks dashboard (Gold only)
+dashboards/                 # Databricks dashboard (.lvdash.json) + its SQL datasets (Gold only)
 ```
 
 ## How to run
@@ -40,7 +40,9 @@ Step by step:
 3. Gold: `notebooks/repeat_purchase_rate_analysis.ipynb`
 4. Cohorts + monitoring: `notebooks/cohort_retention_monitoring.ipynb`
 5. Tests: `notebooks/run_tests.ipynb`
-6. Dashboard: create a Databricks dashboard with the datasets in `dashboards/marketing_dashboard.sql`
+6. Dashboard: **Dashboards → Create → Import dashboard from file** →
+   `dashboards/marketing_lakehouse.lvdash.json` (needs the Gold tables from step 1–4).
+   The same queries are in `dashboards/marketing_dashboard.sql` for reference.
 
 ## Analytics
 
