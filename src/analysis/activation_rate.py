@@ -1,35 +1,19 @@
 from pyspark.sql import functions as F
 
-from config.settings import (
-    CUSTOMER_SILVER,
-    ORDERS_SILVER,
-)
+from config.settings import CUSTOMER_GOLD
 
 
 def calculate_activation_rate(spark, segment="BUILDING"):
-    customers = spark.table(CUSTOMER_SILVER)
-    orders = spark.table(ORDERS_SILVER)
-
-    filtered_customers = (
-        customers
-        .filter(F.col("c_mktsegment") == segment)
-        .join(
-            orders,
-            customers.c_custkey == orders.o_custkey,
-            "left",
-        )
-        .groupBy(customers.c_custkey)
-        .agg(
-            F.count(orders.o_orderkey).alias("orders")
-        )
-    )
+    customers = spark.table(CUSTOMER_GOLD)
 
     result = (
-        filtered_customers
+        customers
+        .filter(F.col("market_segment") == segment)
         .agg(
             F.sum(
-                F.when(F.col("orders") > 0, 1).otherwise(0)
+                F.when(F.col("is_activated"), 1).otherwise(0)
             ).alias("activated_customers"),
+
             F.count("*").alias("total_customers"),
         )
         .withColumn(
