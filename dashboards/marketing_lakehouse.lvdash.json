@@ -1,0 +1,567 @@
+{
+  "datasets": [
+    {
+      "name": "2f1c7c0d",
+      "displayName": "Q1 Activation",
+      "queryLines": [
+        "SELECT\n",
+        "  market_segment,\n",
+        "  COUNT(*)                                         AS total_customers,\n",
+        "  SUM(CASE WHEN is_activated THEN 1 ELSE 0 END)    AS activated_customers,\n",
+        "  AVG(CASE WHEN is_activated THEN 1.0 ELSE 0 END)  AS activation_rate\n",
+        "FROM workspace.marketing_gold.customer_marketing\n",
+        "GROUP BY market_segment\n",
+        "ORDER BY market_segment;"
+      ]
+    },
+    {
+      "name": "1462a29a",
+      "displayName": "Q2 New customers 1996-Q1",
+      "queryLines": [
+        "SELECT month, new_customers\n",
+        "FROM workspace.marketing_gold.monitoring_new_customers_monthly\n",
+        "WHERE quarter = '1996-Q1'\n",
+        "ORDER BY month;"
+      ]
+    },
+    {
+      "name": "40750e29",
+      "displayName": "Q3 Repeat purchase",
+      "queryLines": [
+        "SELECT market_segment, total_customers, repeat_customers, repeat_purchase_rate\n",
+        "FROM workspace.marketing_gold.repeat_purchase_rate_by_segment\n",
+        "ORDER BY repeat_purchase_rate DESC;"
+      ]
+    },
+    {
+      "name": "65fdab85",
+      "displayName": "Q4 Cohort retention",
+      "queryLines": [
+        "SELECT cohort, cohort_customers, returned_customers, retention_rate\n",
+        "FROM workspace.marketing_gold.cohort_retention_1996\n",
+        "ORDER BY cohort;"
+      ]
+    },
+    {
+      "name": "2d26367e",
+      "displayName": "Activation over time",
+      "queryLines": [
+        "SELECT month, market_segment, activation_rate, change_pp, is_alert\n",
+        "FROM workspace.marketing_gold.monitoring_activation_rate_by_segment\n",
+        "ORDER BY month, market_segment;"
+      ]
+    },
+    {
+      "name": "6dcd97e4",
+      "displayName": "New customers over time",
+      "queryLines": [
+        "SELECT month, quarter, new_customers, trailing_avg, is_alert\n",
+        "FROM workspace.marketing_gold.monitoring_new_customers_monthly\n",
+        "ORDER BY month;"
+      ]
+    },
+    {
+      "name": "0b22d9b2",
+      "displayName": "Alerts",
+      "queryLines": [
+        "SELECT month, 'activation_rate_drop' AS alert, market_segment AS scope,\n",
+        "       CAST(ROUND(change_pp, 2) AS STRING) AS detail\n",
+        "FROM workspace.marketing_gold.monitoring_activation_rate_by_segment\n",
+        "WHERE is_alert\n",
+        "UNION ALL\n",
+        "SELECT month, 'new_customers_drop', 'ALL',\n",
+        "       CONCAT(CAST(new_customers AS STRING), ' vs avg ', CAST(ROUND(trailing_avg, 1) AS STRING))\n",
+        "FROM workspace.marketing_gold.monitoring_new_customers_monthly\n",
+        "WHERE is_alert\n",
+        "ORDER BY month DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "549573ed",
+      "displayName": "Marketing",
+      "layout": [
+        {
+          "widget": {
+            "name": "activation-rate-by-segment",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2f1c7c0d",
+                  "fields": [
+                    {
+                      "name": "market_segment",
+                      "expression": "`market_segment`"
+                    },
+                    {
+                      "name": "sum(activation_rate)",
+                      "expression": "SUM(`activation_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block;\">Activation rate by segment</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "market_segment",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(activation_rate)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "axis": {
+                    "title": "activation_rate"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "new-customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1462a29a",
+                  "fields": [
+                    {
+                      "name": "sum(new_customers)",
+                      "expression": "SUM(`new_customers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size:24px\">New Customers in 1996-Q1</span></span>\n\n>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(new_customers)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "repeat-purchase",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "40750e29",
+                  "fields": [
+                    {
+                      "name": "market_segment",
+                      "expression": "`market_segment`"
+                    },
+                    {
+                      "name": "sum(repeat_purchase_rate)",
+                      "expression": "SUM(`repeat_purchase_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block;\">Repeat Purchase</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "market_segment",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(repeat_purchase_rate)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "axis": {
+                    "title": "repeat_purchase_rate"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "retention-rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "65fdab85",
+                  "fields": [
+                    {
+                      "name": "cohort",
+                      "expression": "`cohort`"
+                    },
+                    {
+                      "name": "sum(retention_rate)",
+                      "expression": "SUM(`retention_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block;\">Retention Rate</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "cohort",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(retention_rate)",
+                  "axis": {
+                    "title": "retention_rate"
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "activation-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2d26367e",
+                  "fields": [
+                    {
+                      "name": "market_segment",
+                      "expression": "`market_segment`"
+                    },
+                    {
+                      "name": "monthly(month)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `month`)"
+                    },
+                    {
+                      "name": "sum(activation_rate)",
+                      "expression": "SUM(`activation_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block;\">Activation Over Time</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(month)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(activation_rate)",
+                  "axis": {
+                    "title": "activation_rate"
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "market_segment",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "new-customers-per-month",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6dcd97e4",
+                  "fields": [
+                    {
+                      "name": "monthly(month)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `month`)"
+                    },
+                    {
+                      "name": "sum(new_customers)",
+                      "expression": "SUM(`new_customers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block;\">New customers per month</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(month)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(new_customers)",
+                  "axis": {
+                    "title": "New_Customers"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "alerts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0b22d9b2",
+                  "fields": [
+                    {
+                      "name": "alert",
+                      "expression": "`alert`"
+                    },
+                    {
+                      "name": "detail",
+                      "expression": "`detail`"
+                    },
+                    {
+                      "name": "scope",
+                      "expression": "`scope`"
+                    },
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block;\">Alerts</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "alert"
+                  },
+                  {
+                    "fieldName": "detail"
+                  },
+                  {
+                    "fieldName": "scope"
+                  },
+                  {
+                    "fieldName": "month"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
